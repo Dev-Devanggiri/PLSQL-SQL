@@ -1,0 +1,50 @@
+-- Using alias and order by together
+
+	SELECT
+		first_name,
+		last_name AS Surname
+	FROM actors
+	ORDER BY Surname DESC;
+
+
+--USing expression to sort
+	SELECT
+		first_name,
+		LENGTH(first_name) AS len
+	FROM actors
+	ORDER BY len desc;
+
+
+--Using Order by with column name/number
+-- Sort all records by first_name ascending and DOB descending 
+
+	SELECT first_name,last_name,date_of_birth 
+	FROM actors 
+	ORDER BY 
+		1 ASC,
+		3 DESC;
+
+-- Using ORDER BY with Null values
+	SELECT * 
+	FROM demo_sorting
+	ORDER BY num DESC NULLs FIRST
+
+-- Usig ORDER BY with DISTINCT keyword
+
+	SELECT DISTINCT movie_lang 
+	FROM movies 
+	ORDER BY 1;
+
+
+	SELECT 
+		DISTINCT movie_lang , director_id
+	FROM movies 
+	ORDER BY 1;
+
+
+
+
+
+
+
+	

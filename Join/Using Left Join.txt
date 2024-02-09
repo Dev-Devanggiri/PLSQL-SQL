@@ -1,0 +1,51 @@
+-- Using Left Join
+
+--1. list all the movies with directors first and last name and movie name
+SELECT 
+	mv.movie_name,
+	dr.first_name || ' ' || dr.last_name as "Director''s Name"
+FROM movies "mv"
+LEFT JOIN directors "dr" ON mv.director_id = dr.director_id
+
+--2  Reverse the above SQL statement
+
+SELECT 
+	mv.movie_name,
+	dr.first_name || ' ' || dr.last_name as "Director''s Name"
+FROM directors "dr"
+LEFT JOIN movies "mv"  ON dr.director_id = mv.director_id
+
+--3 Count all movie for each director	
+SELECT 
+	dr.first_name || ' ' || dr.last_name as "Director''s Name",
+	COUNT(*)
+FROM directors "dr"
+LEFT JOIN movies "mv"  ON dr.director_id = mv.director_id
+GROUP BY dr.first_name || ' ' || dr.last_name
+ORDER BY 2 DESC
+
+--4 Get all the movies with age_certificate for all directors where nationalities are
+-- 'American', 'Chinese' and 'Japanese'
+
+SELECT 
+	mv.movie_name,
+	mv.age_certificate,
+	dr.first_name || ' ' || dr.last_name AS "director''s name" ,
+	dr.nationality
+FROM 	
+	directors dr
+LEFT JOIN movies mv ON mv.director_id = dr.director_id
+WHERE dr.nationality in ('American','Chinese','Japanese')
+ORDER BY dr.first_name || ' ' || dr.last_name 
+
+--5  Get all total revenues	done by wach film for each directors		
+SELECT 
+	dr.first_name || ' ' || dr.last_name AS "director''s name" ,
+	SUM((COALESCE(mr.revenues_domestic, 0) + COALESCE(mr.revenues_international,0))) as "total_revenue"
+FROM 	
+	directors dr
+LEFT JOIN movies mv ON mv.director_id = dr.director_id
+LEFT JOIN movies_revenues mr ON mv.movie_id = mr.movie_id
+GROUP BY dr.first_name || ' ' || dr.last_name
+ORDER BY 2 desc
+

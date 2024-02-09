@@ -1,0 +1,54 @@
+-- Creating a Index 
+CREATE INDEX index_name on table_name (col1,col2, ...)
+
+-- Creating a Unique Index 
+CREATE UNIQUE INDEX index_name on table_name (col1,col2, ...)
+
+-- generalized method:
+CREATE INDEX index_name ON table_name [USING method] (
+    column_name [ASC | DESC] [  NULLS {FIRST|LAST} ],
+    ...
+)
+
+-- Creating an index on order_date
+CREATE INDEX idx_orders_order_date ON orders(order_date)
+
+CREATE INDEX idx_orders_ship_city ON orders(ship_city)
+
+-- creating an index on multiple fields say orders -> customer_id, order_id
+CREATE INDEX idx_orders_customers_id_order_id ON orders(customer_id, order_id)
+
+/* Unique Indexes: Normally primary key of a table are kept with a unique index
+if we define a unique index for two or more columns, the combined values in these columns cannot be duplicated in multiple rows
+
+-- Create a unique index*/
+
+CREATE UNIQUE INDEX idx_u_products_product_id on  products (product_id)
+CREATE UNIQUE INDEX idx_u_employees_employee_id on  employees (employee_id)
+
+-- create unique index on multiple columns
+CREATE UNIQUE INDEX idx_u_orders_order_id_customer_id ON orders(order_id, customer_id)
+
+CREATE UNIQUE INDEX idx_u_employees_employee_id_hire_date ON employees(employee_id, hire_date)
+
+select * from employees
+INSERT INTO employees(employee_id, first_name, last_name) values(1, 'nishant', 'Asnani')
+
+-- list all indices:
+select * from pg_indexes
+
+-- list indexes of a table
+select * from pg_indexes where schemaname = 'public'
+
+-- list indexes of a table
+select * from pg_indexes where tablename = 'employees'
+
+--list size of table index
+SELECT pg_size_pretty(pg_indexes_size('orders'))
+
+-- create an index on supplier(region)
+CREATE INDEX idx_suppliers_region ON suppliers (region)
+
+CREATE UNIQUE INDEX idx_u_suppliers_supplier_id ON suppliers (supplier_id)
+
+

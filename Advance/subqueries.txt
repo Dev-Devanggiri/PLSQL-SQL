@@ -1,0 +1,32 @@
+-- Subqueries
+--1. a) Find the movies average length and then 
+SELECT avg(movie_length)::Numeric(6,2) FROM movies
+
+--1. b) Use the above result to find movies which are longer than avg movie length
+SELECT * FROM MOVIES 
+WHERE movie_length > (SELECT avg(movie_length)::Numeric(6,2) FROM movies)
+
+--2. Filter above result for English movie only
+SELECT * FROM MOVIES 
+WHERE movie_length > (SELECT avg(movie_length)::Numeric(6,2) FROM movies) and movie_lang = 'English'
+
+--3.Get first and last name of all the actors who are younger than Douglas Silva
+SELECT first_name || last_name FROM actors 
+WHERE date_of_birth > (SELECT date_of_birth FROM actors WHERE first_name = 'Douglas' and last_name = 'Silva')
+
+--4. Find all movies where domestic revenues are greater than 200
+SELECT movie_name FROM movies
+WHERE movie_id in (SELECT movie_id FROM movies_revenues WHERE revenues_domestic > 200)
+
+--5. Find all movies where domestic revenues are higher than the international revenues
+SELECT movie_name FROM movies
+WHERE movie_id in (SELECT movie_id FROM movies_revenues WHERE revenues_domestic > revenues_international)
+
+--6. List all directors where their movies made more than the average total revenues of english
+
+SELECT first_name || ' ' || last_name FROM directors
+WHERE director_id in (SELECT mv.director_id FROM movies mv JOIN movies_revenues mr on mv.movie_id = mr.movie_id
+					  WHERE mv.movie_lang = 'English' and (mr.revenues_domestic + mr.revenues_international) > 
+					 (SELECT AVG(revenues_domestic + revenues_international)  from movies_revenues
+					 ))
+

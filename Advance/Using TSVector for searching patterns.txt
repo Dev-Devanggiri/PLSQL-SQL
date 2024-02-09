@@ -1,0 +1,81 @@
+-- Powerful text searches in pgSQL
+--tsvector 
+
+--1. create a table called 'table_tsvector'
+
+CREATE TABLE docs(
+	DOC_ID SERIAL PRIMARY KEY,
+	doc_text TEXT,
+	doc_text_search TSVECTOR
+)
+
+INSERT INTO docs(doc_text) VALUES
+('The five boxing wizards jump quickly '),
+('Pack my box with five dozen pepsi jugs'),
+('How vexingly quick daft zebras jump'),
+('Jackdaws love my big sphinx of quartz')
+
+UPDATE docs SET  doc_text_search = to_tsvector(doc_text)
+
+-- searching using ts_query
+
+SELECT doc_id, doc_text
+FROM docs 
+WHERE doc_text_search @@ to_tsquery('jumping')
+
+
+SELECT doc_id, doc_text
+FROM docs 
+WHERE doc_text_search @@ to_tsquery('jumping <-> quick)
+
+									
+-- Analyze President's speech
+CREATE TABLE docs_presidents(
+	doc_id SERIAL PRIMARY KEY,
+	president VARCHAR(100) NOT NULL,
+	title VARCHAR(250) NOT NULL,
+	speech_date DATE NOT NULL,
+	speech_text TEXT NOT NULL,
+	speech_text_search TSVECTOR
+)
+
+SELECT * from docs_presidents
+
+update docs_presidents 
+set speech_text_search = to_tsvector(speech_text)
+
+update docs_presidents 
+set speech_text_search = to_tsvector('english',speech_text)
+
+-- create special index for ts_vector
+CREATE INDEX idx_gin_docs_presidents_speech_text_search ON docs_presidents USING GIN(speech_text_search)
+
+-- Search a word 'World'
+SELECT president, title, speech_text_search From docs_presidents WHERE speech_text_search @@ to_tsquery('World')
+
+-- Search a word 'War & Peace'
+SELECT president, title, speech_text_search From docs_presidents WHERE speech_text_search @@ to_tsquery('War & Peace')
+
+-- Search a word military and defence together
+SELECT president, title, speech_text_search From docs_presidents WHERE speech_text_search @@ to_tsquery('military <-> defense')
+
+-- Using ts_headline
+
+SELECT
+	president,
+	title,
+	speech_date,
+	ts_headline(speech_text, to_tsquery('military <-> defense'))
+From docs_presidents 
+WHERE speech_text_search @@ to_tsquery('military <-> defense')
+
+-- Ranking Query Matches using ts_rank function
+SELECT
+	president,
+	title,
+	speech_date,
+	ts_rank(speech_text_search, to_tsquery('military <-> defense'),2) as score
+From docs_presidents 
+WHERE speech_text_search @@ to_tsquery('military <-> defense') 
+ORDER BY score DESC
+

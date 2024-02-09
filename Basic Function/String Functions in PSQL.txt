@@ -1,0 +1,38 @@
+-- STRING FUNCTIONS
+
+-- 1 using upper
+SELECT UPPER('amazing Postgre') 
+
+-- 2 using lower
+SELECT UPPER('SDGFFG DSFDF') 
+
+-- 3 USING INITCAP
+SELECT INITCAP('quick brown fox')
+
+-- 4 Using LEFT function
+SELECT LEFT('Hello',3)
+
+-- 5 Using RIGHT function
+SELECT RIGHT('Hello',-1)
+
+-- 6 Using REVERSE function
+SELECT REVERSE('Hello')
+
+-- 7 Using SPLIT_PART function
+SELECT SPLIT_PART('Hello mY nAME IS rajan' ,' ' ,-1)
+
+ -- 8 Using TRIM function
+ SELECT('    RAJAN')
+ SELECT TRIM(LEADING '000' FROM CAST(000123354 AS TEXT))
+ SELECT TRIM(TRAILING FROM 'RAJAN   ')
+ SELECT TRIM(BOTH FROM '  RAJAN  ')
+ 
+ -- 9 Using lTRIM function
+SELECT LTRIM(' RAJAN')
+
+ 
+ -- 10 Using RTRIMfunction
+SELECT RTRIM(' RAJAN    ')
+
+ -- 11 Using BRIMfunction
+SELECT BTRIM('ASDRAJANASD','AS')

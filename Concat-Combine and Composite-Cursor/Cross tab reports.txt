@@ -1,0 +1,117 @@
+-- Creating Crosstab reports
+CREATE EXTENSION IF NOT EXISTS tablefunc--1.0;
+select * from pg_extension;
+
+-- creating a testing table and data
+CREATE TABLE scores (
+	score_id SERIAL PRIMARY KEY,
+	name VARCHAR (100),
+	subject VARCHAR (100),
+	score NUMEIC(4,2),
+	score_date DATE
+
+INSERT INTO scores (name,subject,score, score_date) VALUES 
+('Adam','Math',10,'2020-01-01'),
+('Adam','English',8,'2020-02-01'),
+('Adam','History',7,'2020-03-01'),
+('Adam','Music',9,'2020-04-01'),
+('Linda','Math',12,'2020-01-01'),  	
+('Linda','English',10,'2020-02-01'),
+('Linda','History',8,'2020-03-01'),
+('Linda','Music',6,'2020-04-01');
+	
+------------------------------------------------------------
+-- create 1st table
+SELECT * FROM crosstab
+(
+	'SELECT name,subject,score FROM scores'
+) AS ct
+	(
+		Name VARCHAR,
+		Maths NUMERIC,
+		History NUMERIC,
+		English NUMERIC,
+		Music NUMERIC
+	)
+
+-------------------------------------------------------------
+-- Analyzing Crosstab report of rainfalldata.sql
+SELECT  * FROM rainfalls
+SELECT DISTINCT year FROM rainfalls
+--create a pivot table to display sum of all raindays per each location for each year
+SELECT *
+FROM crosstab	
+( 
+	'SELECT
+		location,
+		year,
+		sum(raindays)
+	FROM rainfalls
+	group by location,year
+	order by location,year 
+'
+)
+AS ct(
+	"Location" TEXT,
+	"2012" bigint,
+	"2013" bigint,
+	"2014" bigint,
+	"2015" bigint,
+	"2016" bigint,
+	"2017" bigint
+) 
+-----------------------------
+
+SELECT *
+FROM crosstab	
+( 
+	'SELECT
+		location, month,
+		sum(raindays)
+	FROM rainfalls
+	group by location, month
+	order by location,month 
+'
+)
+AS ct(
+	"Location" TEXT,
+	"jan" bigint,
+	"feb" bigint,
+	"mar" bigint,
+	"apr" bigint,
+	"jun" bigint,
+	"jul" bigint,
+	"aug" bigint,
+	"sep" bigint,
+	"oct" bigint,
+	"nov" bigint,
+	"dec" bigint
+)
+
+----------------------------------------------------------------------
+SELECT *
+FROM crosstab	
+( 
+	'SELECT
+		month, location,
+		sum(raindays) :: int
+	FROM rainfalls
+	group by  month,location
+	order by month,location
+'
+)
+AS ct(
+	month integer,
+	"Dubai" int,
+	"France" int,
+	"Germany" int,
+	"London" int,
+	"Malaysia" int,
+	"Qatar" int,
+	"Sydney" int,
+	"Singapore" int,
+	"Tokyo" int
+)
+
+
+ 

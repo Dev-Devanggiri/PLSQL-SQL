@@ -1,0 +1,24 @@
+-- Using IS NULL and IS NOT NULL keyword
+-- 1. Find list of all actors with missing DOB
+	SELECT * 
+	FROM actors 
+	WHERE date_of_birth IS NULL
+
+-- 2.Find list of all actors with missing DOB or missing first name
+	SELECT * 
+	FROM actors 
+	WHERE date_of_birth IS NULL or first_name IS NULL
+
+-- 3.Get list of all movies where domestic revenue is NULL
+	SELECT movies.movie_id, movies.movie_name, movies_revenues.revenues_domestic
+	FROM movies,movies_revenues
+	WHERE (movies.movie_id = movies_revenues.movie_id)
+		   AND revenues_domestic IS NULL
+	ORDER BY movie_name
+
+-- 4. Get list of all movies where either domestic revenue is NULL or international revenue is NULL
+	SELECT movies.movie_id, movies.movie_name, movies_revenues.revenues_domestic, movies_revenues.revenues_international
+	FROM movies,movies_revenues
+	WHERE (movies.movie_id = movies_revenues.movie_id)
+		   AND (revenues_domestic IS NULL or revenues_international IS NULL)
+	ORDER BY movie_name

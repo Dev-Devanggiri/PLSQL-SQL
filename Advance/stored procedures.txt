@@ -1,0 +1,49 @@
+-- Stored Procedures
+-- Creating a Transaction	
+
+CREATE TABLE t_accounts(
+	recid serial primary key,
+	name VARCHAR NOT NULL,
+	balance dec(15,2) NOT NULL
+)
+
+INSERT INTO t_accounts(name,balance) VALUES
+('adam',100),
+('Linda',100)
+
+-- create a stored procedure
+CREATE OR REPLACE PROCEDURE pr_money_transfer(
+	sender int,
+	receiver int,
+	amount dec
+)
+AS
+$$
+	BEGIN
+		UPDATE t_accounts SET balance = balance - amount
+		WHERE recid = sender;
+		UPDATE t_accounts SET balance = balance + amount
+		WHERE recid = receiver;
+		
+		commit;
+	END;
+$$ LANGUAGE PLPGSQL 
+
+CALL pr_money_transfer(1,2,100)
+
+select * from t_accounts
+
+-- INOUT parameter mode to return a value
+-- return total counts using INOUT parameter 
+CREATE OR REPLACE PROCEDURE pr_orders_count(INOUT total_count integer default 0) as
+$$
+	BEGIN
+		SELECT COUNT(*) INTO total_count FROM ORDERS ;
+	END;
+$$ LANGUAGE PLPGSQL
+
+CALL pr_orders_count()
+
+-- drop procedure
+
+ DROP PROCEDURE IF EXISTS procedure_name [optional arguments list] [cascade | restrict]

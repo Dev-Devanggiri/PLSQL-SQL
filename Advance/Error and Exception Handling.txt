@@ -1,0 +1,34 @@
+--Error Handling
+-- using exception clause
+
+DO
+$$	
+	DECLARE
+		REC RECORD;
+		ORDERID INT := 1;
+	BEGIN
+		SELECT customer_id,order_date FROM ORDERS INTO STRICT rec WHERE ORDER_ID = ORDERID; 
+		
+		EXCEPTION 
+			WHEN NO_DATA_FOUND THEN 
+				RAISE EXCEPTION 'No order was found';
+	END;
+$$ LANGUAGE PLPGSQL;
+
+-- exception for too many rows
+SELECT * FROM CUSTOMERS
+DO 
+$$
+	DECLARE 
+		rec record;
+	BEGIN 
+		SELECT customer_id, company_name 
+		FROM customers 
+		INTO STRICT rec 
+		WHERE company_name LIKE 'A%';
+		EXCEPTION 
+		WHEN TOO_MANY_ROWs THEN RAISE EXCEPTION 'More than 1 rows supplied';
+	END;
+	
+$$ LANGUAGE PLPGSQL
+

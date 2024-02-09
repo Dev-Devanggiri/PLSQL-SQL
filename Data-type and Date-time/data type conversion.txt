@@ -1,0 +1,48 @@
+select * from movies
+
+-- Using CAST for data conversion
+SELECT 
+	CAST('10' AS integer)
+	
+	
+SELECT 
+	CAST('1 May, 2024' AS TIMEstamp)
+	
+SELECT 
+	CAST('true' AS BOOLEAN) 
+	
+SELECT 
+	CAST('54.125215' AS DOUBLE PRECISION) 
+
+-- Casting Using expression::datatype format
+SELECT
+	'54.125215' :: DOUBLE PRECISION
+
+SELECT 
+	'1 May, 2024' :: TIMEstamp
+
+
+-- Converting into intervals
+
+SELECT
+	'10 minutes' :: interval
+	
+SELECT
+	'4 hour' :: interval
+	
+SELECT
+	'6 years' :: interval	
+
+--explicit and implicit conversion
+
+SELECT factorial(Cast(20 as bigint)) AS "RESULT";
+
+SELECT ROUND(Cast(20 as NUMERIC),4) AS RESULT
+
+-- Cast with text
+
+SELECT SUBSTR('123456',2) AS RESULT
+SELECT SUBSTR(CAST('123456' AS TEXT),2) AS RESULT
+
+--TABLE DATA CONVERSION WITH CAST
+

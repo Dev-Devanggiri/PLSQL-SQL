@@ -1,0 +1,302 @@
+-- PL/pgSQL
+
+-- structure of a PLpgSQL function
+/*
+CREATE FUNCTION fun_name(p1 type, p2 type....) RETURNS return_type AS
+$$
+	BEGIN
+		-- STATEMENTS ...
+		
+		RETURN ...
+	END;
+$$ LANGUAGE PLPGSQL
+*/
+
+--1. Get the max price of all products
+CREATE OR REPLACE FUNCTION fn_api_products_max_price()
+RETURNS BIGINT AS
+$$
+	BEGIN
+		RETURN MAX(unit_price) FROM products;
+	END;
+$$ LANGUAGE PLPGSQL
+
+SELECT fn_api_products_max_price()
+
+-- PL/pgSQL block structure
+/*
+	[ <<label>> ]
+	[ DECLARE 
+		variable_name data_type [:= expressions]
+		DECLARATIONS; ]
+	BEGIN
+		STATEMENTS;
+	END;[LABEL]
+	
+	*/
+	
+-- Using block structure
+DO
+$$
+	DECLARE
+		mynum  integer := 1;
+		first_name  varchar(100) := 'Adnan';
+		hire_date date:='2020-01-01';
+		start_time timestamp := NOW();
+		emptyvar integer;
+	BEGIN
+		RAISE NOTICE  'My Variables	% % % % % ',
+		mynum, first_name,hire_date,start_time,emptyvar;
+	END
+$$ 
+
+-- However main difference between SQL functions and PLPGSQL functions is 
+-- regarding usage of transactions
+-- declaring variables in functions
+CREATE OR REPLACE FUNCTION fn_my_sum1(integer, integer) RETURNS integer AS 
+$BODY$
+	DECLARE
+		ret integer;
+		a alias for $1;
+		b alias for $2;
+	BEGIN
+		ret := a+b;
+		RETURN ret;
+	END;
+$BODY$
+LANGUAGE PLPGSQL;
+
+SELECT fn_my_sum1(3,6)
+
+-- Variable Initializing Timing
+DO
+$$
+	DECLARE
+		start_time time := NOW();
+	BEGIN
+		RAISE NOTICE 'sTARTING AT : %',start_time;
+		PERFORM pg_sleep(5);
+		RAISE NOTICE 'Next time: %',start_time;
+
+	END;
+$$
+LANGUAGE PLPGSQL;
+
+
+--- Copying data type from table
+
+DO 
+$$
+DECLARE
+	prod_name products.product_name%TYPE;
+BEGIN 	
+	prod_name = 'new prod';
+	RETURN prod_name;
+END;
+$$
+LANGUAGE PLPGSQL
+
+-- Assigning Variables from Query
+-- Syntax SELECT expression INTO variable_name
+-- EX
+SELECT * FROM products LIMIT 1 INTO product_row ;	
+SELECT product_name FROM product_row;
+
+--1. return the name of a product for a particular product_id
+-- CREATE OR REPLACEE FUNCTION pg_
+DO
+$$
+	DECLARE
+		product_title products.product_name%TYPE;
+	BEGIN
+		SELECT product_name FROM products 
+		WHERE product_id = 1 INTO product_title LIMIT 1;
+		RAISE INFO '%', product_title;
+	END;
+$$ LANGUAGE PLPGSQL
+
+-- Acccessing the full row data result set
+DO
+$$
+	DECLARE
+		product_row record;
+	BEGIN
+		SELECT * FROM products 
+		WHERE product_id = 1 INTO product_row LIMIT 1;
+		RAISE INFO 'Your Product Name IS %, and it''s unit price is % Rs.', product_row.product_name, product_row.unit_price;
+	END;
+$$ LANGUAGE PLPGSQL
+
+-- Using IN, OUT, INOUT without RETURNS
+/*
+Syntax: 
+IN variable_name type
+OUT variable_name type
+INOUT variable_name type
+*/
+--1 Create a function to calculate sum of three varicales
+CREATE OR REPLACE FUNCTION fn_2_sum(IN x INTEGER,IN y INTEGER,OUT z INTEGER) AS
+$$
+	BEGIN
+		z:=X+Y;
+	END;
+$$ LANGUAGE PLPGSQL
+
+select fn_2_sum(3,4)
+
+-- creating nested blocks
+-- i.e. block within a block
+DO
+$$
+	<<PARENT>>
+	DECLARE
+ 		counter integer := 0;
+	BEGIN
+		counter := counter + 1 ;
+		<<CHILD>>
+		DECLARE
+			counter integer := 0;
+		BEGIN 
+			counter := counter + 5;
+			RAISE NOTICE 'Value of counter in sub block is %',counter;
+			RAISE NOTICE 'Value of counter in main block is %',parent.counter;
+		END child;
+	END parent;
+$$ LANGUAGE PLPGSQL
+ 
+-- RETURN query result 
+-- Top 10 queries by over_date
+CREATE OR REPLACE FUNCTION fn_top_10() RETURNS SETOF orders AS
+$$
+BEGIN
+	RETURN QUERY SELECT * FROM orders ORDER BY order_date DESC LIMIT 10;
+END
+$$ LANGUAGE PLPGSQL
+
+SELECT (fn_top_10()).*
+
+
+-- Control Structures
+/* 
+3 types
+- Conditional statementd
+	- if
+	- case
+- Loop Statements
+- Exceptional Handler Statements
+
+*/
+-- Check which is greater
+CREATE OR REPLACE FUNCTION fn_my_check(x integer, y integer) RETURNS TEXT AS 
+$$
+	BEGIN
+		IF x>y THEN
+			RETURN 'x>y';
+		ELSEIF x = y THEN
+			RETURN 'x=y';
+		ELSE
+			RETURN 'X<Y';
+		END IF;
+	END;	
+$$	LANGUAGE PLPGSQL
+
+SELECT fn_my_check(2,2)
+
+-- Using IF with table
+CREATE OR REPLACE FUNCTION fn_price_range(price real ) RETURNS text AS
+$$
+	BEGIN 
+	IF price>50 THEN
+		RETURN 'High';
+	ELSEIF price > 25 THEN
+		RETURN 'Medium';
+	ELSE	
+		RETURN 'Sweet Spot';
+	END IF;
+	END;
+$$ LANGUAGE PLPGsql
+
+SELECT fn_price_range(unit_price), product_name from products;
+
+-- CASE STATEMENT
+/*
+2 types :
+- simple
+- searched 
+*/
+
+--EX
+CREATE OR REPLACE FUNCTION fn_check_range(x integer ) RETURNS Text as
+$$
+	BEGIN
+		CASE x
+			 when 10 THEN 
+			 	RETURN 'value = 10';
+			 when 20 THEN 
+				RETURN 'value = 20';
+		 	else
+				RETURN x;
+		END CASE;
+	END;
+$$ LANGUAGE PLPGSQL;
+
+SELECT fn_check_range(20)
+
+
+--- Searched Case statement
+
+DO
+$$
+	DECLARE
+		order_amount1 numeric;
+		order_type varchar(50);
+	BEGIN
+		SELECT  SUM((unit_price * quantity) - discount) INTO order_amount1 FROM order_details
+		WHERE order_id = 10248;
+	
+    	IF FOUND THEN
+			CASE 
+				WHEN order_amount1 > 200 THEN 
+					order_type := 'Platinum';
+				WHEN order_amount1 > 100 THEN
+					order_type := 'Gold';
+				ELSE 
+					order_type := 'Silver';
+			END CASE;
+			RAISE NOTICE 'Order type is %',order_type;
+		ELSE 
+			RAISE NOTICE 'No order was found';
+		END IF;
+	END;
+$$ LANGUAGE PLPGSQL	
+
+--RETURNS TABLE 
+
+CREATE OR REPLACE FUNCTION fn_products_by_name(p_pattern varchar)
+RETURNS TABLE(productname varchar, unitprice real) AS
+$$
+	BEGIN
+		RETURN QUERY SELECT product_name,unit_price FROM products WHERE product_name LIKE p_pattern; 
+	END;
+$$ LANGUAGE PLPGSQL
+
+SELECT (fn_products_by_name('Chai')).*
+
+-- Using Return Next
+
+-- Get all orders where unit_price > 10000
+CREATE OR REPLACE FUNCTION fn_unit_price() RETURNS SETOF order_details AS
+$$
+	DECLARE
+		r record;
+	BEGIN
+		FOR r IN 
+			SELECT * FROM order_details WHERE unit_price > 10
+		LOOP
+			RETURN NEXT r;
+		END LOOP;
+	RETURN; 
+	END;
+$$ LANGUAGE PLPGSQL
+
+SELECT * FROM  fn_unit_price()

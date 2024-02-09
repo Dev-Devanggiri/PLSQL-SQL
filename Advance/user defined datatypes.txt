@@ -1,0 +1,64 @@
+-- Creating DOMAINS
+CREATE DOMAIN addr VARCHAR(100) NOT NULL
+
+CREATE TABLE locations (
+	address addr
+ );
+
+INSERT INTO locations (address) 
+VALUES ('123, London');
+
+SELECT * FROM locations
+
+-- Ex. Create a positive_numeric datatype using positive NUMVERIC
+
+CREATE DOMAIN positive_numeric INT NOT NULL CHECK (VALUE > 0)
+
+CREATE TABLE sample(
+	id SERIAL PRIMARY KEY,
+	value_num positive_numeric
+);
+INSERT INTO sample  (value_num) VALUES(5)
+
+
+
+-- Ex. Create us_postal_code datatype domain to check for valid US Postal Code
+CREATE DOMAIN us_postal_code AS TEXT
+CHECK(
+	VALUE~'^\d{5}$'
+	OR VALUE~'^\D{5}-\d{4}$'
+);
+
+CREATE TABLE address (
+	add_id SERIAL PRIMARY KEY,
+	postal_us us_postal_code
+);
+
+INSERT INTO address (postal_us) VALUES ('10000')
+
+SELECT * FROM address
+
+-- create an enumeration type (Enum or set of values) domain 
+
+CREATE DOMAIN valid_color varchar(10)
+CHECK (VALUE IN ('red','green','blue'))
+
+create table color (
+	color valid_color
+);
+
+INSERT INTO color VALUES ('red')
+
+
+-- How to list all domains we created in a schema 
+
+SELECT typname
+FROM pg_catalog.pg_type
+JOIN pg_catalog.pg_namespace
+ON pg_namespace.oid = pg_type.typnamespace
+WHERE typtype = 'd' and nspname = 'public';
+
+
+-- DROP a Domain type
+DROP DOMAiN positive_numeric CASCADE
+SELECT * FROM SAMPLE

@@ -1,0 +1,99 @@
+-- Loop Statement  
+--1 Simple Loop
+DO
+$$
+DECLARE
+	COUNTER INTEGER :=1 ;
+BEGIN
+	LOOP 
+		RAISE NOTICE '%', COUNTER;
+		COUNTER = COUNTER + 1;
+		EXIT WHEN COUNTER = 11;
+	END LOOP;
+END;
+$$ LANGUAGE PLPGSQL
+
+
+--1 For Loop
+DO 
+$$
+	BEGIN
+	FOR counter IN 1..10
+	LOOP
+		RAISE NOTICE '%',COUNTER;
+	END LOOP;
+	END;
+$$ LANGUAGE PLPGSQL
+
+-- USING REVERSE
+DO 
+$$
+	BEGIN
+	FOR counter IN REVERSE 10..1
+	LOOP
+		RAISE NOTICE '%',COUNTER;
+	END LOOP;
+	END;
+$$ LANGUAGE PLPGSQL
+
+-- USING STEPPING
+DO 
+$$
+	BEGIN
+	FOR counter IN 0..10 BY 2
+	LOOP
+		RAISE NOTICE '%',COUNTER;
+	END LOOP;
+	END;
+$$ LANGUAGE PLPGSQL
+
+
+-- Using For loops to iterate over the result set
+DO
+$$
+	DECLARE 
+		REC RECORD;
+	BEGIN
+		FOR REC IN (SELECT product_id FROM products)
+		LOOP
+			RAISE INFO '%,%',REC.product_id, (SELECT product_name FROM products WHERE product_id = REC.product_id);
+		END LOOP;
+	END;
+$$ LANGUAGE PLPGSQL
+
+-- FOREACH Loop
+DO
+$$
+	DECLARE
+		array1 INT[] := array[1,2,3,4];
+		val int;
+	BEGIN
+		FOREACH val IN ARRAY array1
+		LOOP
+			raise notice '%',val;
+		END LOOP;
+	END;
+$$ LANGUAGE PLPGSQL
+
+-- WHILE Loop
+-- WHILE Loops
+-- create a table and insert values using while loop
+CREATE TABLE temp(
+	id SERIAL PRIMARY KEY,
+	NUM NUMERIC
+)	
+
+DO
+$$
+	DECLARE
+		counter integer := 0;
+	BEGIN
+		WHILE COUNTER < 100
+		LOOP
+			UPDATE TEMP SET num = counter where num = counter + 1;
+			counter = counter + 5;
+		END LOOP;
+	END;
+$$ LANGUAGE PLPGSQL
+
+SELECT * FROM TEMP

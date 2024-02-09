@@ -1,0 +1,45 @@
+-- SElf join
+-- Find all pairs of movies that have the same movie length
+
+SELECT
+	mv1.movie_name,
+	mv2.movie_name,
+	mv1.movie_length	
+FROM movies mv1
+JOIN movies mv2 on mv1.movie_length = mv2.movie_length
+WHERE mv1.movie_name != mv2.movie_name
+
+-- based on movie_id and director_id
+SELECT
+	mv1.movie_name,
+	mv2.movie_name,
+	mv1.movie_id,
+	mv2.director_id,
+	mv1.director_id
+FROM movies mv1
+JOIN movies mv2 on mv1.movie_id = mv2.director_id
+
+-- Cross Join
+SELECT * 
+FROM movies 
+CROSS JOIN directors
+
+--CROSS JOIN actors and directors
+SELECT * 
+FROM directors
+CROSS JOIN actors
+
+-- Natural Join
+Select 
+	mv.movie_name,
+	dr.first_name
+from movies mv
+NATURAL JOIN directors dr
+
+
+
+SELECT 
+	dr.first_name,
+	mr.revenues_domestic
+FROM movies_revenues mr
+NATURAL JOIN directors dr

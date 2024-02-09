@@ -1,0 +1,150 @@
+ -- JSON in postgreSQL
+ --JSONB
+ CREATE TABLE books(
+	 book_id SERIAL PRIMARY KEY,
+	 book_info jsonb
+ );
+ 
+ INSERT INTO books (book_info) Values
+ (
+	 '{
+	 	"title":"Book Title 1",
+	 	"author": "author 1"
+  	  }'
+ );
+
+INSERT INTO books (book_info) Values
+ (
+	 '{
+	 	"title":"Book Title 2",
+	 	"author": "author 2"
+  	  }'
+ ),
+ (
+	 '{
+	 	"title":"Book Title 3",
+	 	"author": "author 3"
+  	  }'
+ );
+ 
+ SELECT * FROM books
+ SELECT book_info ->> 'title' AS "titles" FROM books
+ 
+ --Updating JSON data:
+ -- use || concatenation operator
+ 
+ 
+UPDATE books
+SET book_info = book_info || '{"author":"JK Rowling", "title":"Harry Potter And The Order Of Pheonix"}' :: jsonb
+WHERE book_info ->> 'author' = 'author 1'
+
+-- DELETE VALUE 
+UPDATE books
+SET book_info = book_info - 'Best Seller'
+WHERE book_info ->> 'author' = 'JK Rowling'
+
+SELECT *  FROM books
+
+-- Creating JSON from table
+SELECT * FROM directors
+
+SELECT row_to_json(directors) FROM directors
+
+-- add additional field
+UPDATE books
+SET book_info = book_info || '{"Best Seller":true}' :: jsonb
+WHERE book_info ->> 'author' = 'JK Rowling'
+
+-- Using json_agg() function
+
+SELECT director_id, first_name,
+(
+	SELECT json_agg(x) FROM
+		(
+			select movie_name from movies where director_id = dr.director_id
+		) as x
+)
+FROM directors dr
+ORDER BY director_id
+
+select director_id, movie_name from movies order by director_id
+
+-- JSON ARRAY
+SELECT json_build_array(1,2,3,4,5)
+
+-- building Json object
+-- method 1
+SELECT json_build_object('name','Rajan', 'last_name','Jasani')
+-- method 2
+SELECT json_object('{name,email}','{Rajan,raj@g.com}')
+
+
+-- Creating a document from data
+CREATE TABLE director_docs(
+	id SERIAL PRIMARY KEY,
+	body JSONB
+)
+INSERT into director_docs (body)
+(SELECT row_to_json(doc) From (
+	SELECT 
+	director_id,
+	first_name,
+	last_name,
+	nationality,
+	(
+		SELECT case count(*) when 0 then '[]' else json_agg(x) END as all_movies FROM 	
+		(
+			SELECT 
+				movie_name
+			FROM movies
+			WHERE director_id = dr.director_id
+		) x
+	)
+FROM directors dr) as doc)
+
+select * from director_docs
+
+-- Getting information from JSON documents
+
+-- Count total movies for each directors
+SELECT *, jsonb_array_length(body->'all_movies') as "total movies" from director_docs
+order by "total movies" DESC
+-- list all the keys within each JSON row
+SELECT jsonb_object_keys(body) as "keys" from director_docs
+SELECT *,jsonb_each(body) as "keys" from director_docs
+
+--existence operator
+SELECT * FROM director_docs
+WHERE body->'first_name' ? 'John'
+
+-- Containment operator
+SELECT * FROM director_docs
+WHERE body @> '{"first_name":"John"}'
+
+SELECT * FROM director_docs
+WHERE body @> '{"director_id":1}'
+
+-- MIX and MATCH JSON search
+
+SELECT * FROM director_docs
+where body ->> 'first_name' LIKE 'J%'
+
+-- find all records where director_id is greater than 2
+SELECT * FROM director_docs
+where (body ->> 'director_id')::int > 2
+
+-- Indexing on JSONB
+	SELECT * FROM contacts_docs
+	
+-- Create a GIN index	
+CREATE INDEX idx_gin_contacts_docs_body ON contacts_docs USING GIN(body)
+	 
+
+EXPLAIN ANALYSE SELECT * FROM contacts_docs
+where body ->> 'first_name' LIKE 'John'
+
+-- Checking the size of index
+SELECT pg_size_pretty(pg_relation_size('idx_gin_contacts_docs_body_cool'::regclass)) as index_name
+
+--better index
+CREATE INDEX idx_gin_contacts_docs_body_cool ON contacts_docs USING GIN(body jsonb_path_ops)

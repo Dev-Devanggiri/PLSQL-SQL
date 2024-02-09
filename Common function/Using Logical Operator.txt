@@ -1,0 +1,37 @@
+-- Using Single Condition:
+	SELECT * FROM movies
+	WHERE movie_lang = 'English';
+
+-- Using AND Operator 
+	SELECT * 
+	FROM movies
+	WHERE movie_lang = 'English' AND age_certificate = '18';
+
+-- Using logical OR Operator
+	SELECT *
+	FROM movies
+	WHERE movie_lang = 'Chinese' OR movie_lang = 'English'
+	ORDER BY movie_lang DESC;
+
+-- Get all english language and director_ID EQUAL TO 8
+	SELECT * 
+	FROM movies
+	WHERE movie_lang = 'English' 
+	      AND director_id = '8';
+
+-- Combining AND and OR operator	
+-- Get all English and chinese movies with age_certificate equal to 12
+	SELECT *
+	FROM movies
+	WHERE 	(movie_lang = 'English' OR movie_lang = 'Chinese') 
+		AND age_certificate = '12';
+
+-- Using Comparison Operators
+-- Get all the movies where movie_len is greater than 100
+	SELECT * 
+	FROM movies
+	WHERE movie_length > '100';
+
+
+-- Filtering based on date
+	SELECT * FROM movies WHERE release_date = '1972-02-02'

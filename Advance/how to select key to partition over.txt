@@ -1,0 +1,25 @@
+Step1 : 
+    - Review and Understand raw data
+    - Understand upper and lower levels
+    - possible query user will fire to access the data from teh table
+    
+
+Step2 : 
+    - Review all possible queries
+    - Rank queries in terms of simple to advance
+    - put advance queries on top to consider
+
+
+Step3 :
+    - Collect common field in each queries
+
+
+Step4 :
+    - Rank each common fields so we can get top 10 common field keys
+
+Step5 : 
+    - pick best candidates for a key field to partition over from the top 5/10 fields
+
+Step6 : 
+    - Consider what fields are being used most in the WHERE clauses
+    

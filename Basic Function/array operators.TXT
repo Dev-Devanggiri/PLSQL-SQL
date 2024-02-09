@@ -1,0 +1,29 @@
+@> : Contains operator
+<@ : Contained by operator
+&& : Overlaps operator
+|| : Concatenation
+ARRAY_CAT(arr1,arr2) : Concatenation function
+
+--Adding an element before an array  : element || arr 
+--Adding an element behind an array  : arr  ||  element
+ARRAY_PREPEND(element, arr) : adds element to the beginning of an array
+ARRAY_APPEND(ARR,element ) 
+
+
+
+-- ARRAY META DATA
+
+ARRAY_NDIM(arr) : RETURNS NO. OF DIMENSION IN AN ARRAY
+ARRAY_DIM(arr) : RETURNS NO. OF DIMENSION IN AN ARRAY IN TEXT FORM
+
+ARRAY_LENGTH(ARR) : RETURNS LENGTH OF ARRAY
+ARRAY_POSITION(ARR, element) : RETURNS POSITION OF FIRST OCCURENCE OF element
+
+ARRAY_REMOVE(ARR,element) : REMOVES ALL OCCURENCES OF element
+ 
+ARRAY_REPLACE(ARR, from element, to element) : REMOVES ALL OCCURENCES OF element with new element
+
+
+-- String to Array function:
+STRING_TO_ARRAY(string) : converts string into array
+

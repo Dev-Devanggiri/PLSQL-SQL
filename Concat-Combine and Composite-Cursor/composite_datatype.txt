@@ -1,0 +1,55 @@
+ -- Using composite data type
+ --EX. Create an address composite data type
+ 
+CREATE TYPE address1 AS (
+ 	city VARCHAR(50),
+	 country VARCHAR(20)
+ )
+ 
+CREATE TABLE companies(
+	comp_id SERIAL PRIMARY KEY,
+	address address1
+)
+
+
+INSERT INTO companies (address) 
+VALUES (ROW('NEW YORK', 'US'))
+
+SELECT * FROM COMPANIES
+
+
+--Ex2. Create a composite inventory_item data type
+CREATE TYPE inventory_item AS
+(
+	prod_name varchar(200),
+	supplier_id INT,
+ 	price NUMERIC
+)
+CREATE TABLE inventory	(
+	inventory_id SERIAL PRIMARY KEY,
+	item inventory_item
+)
+INSERT INTO inventory (item) VALUES (ROW('paper',20,9.99))
+SELECT (item).prod_name  FROM inventory WHERE (item).price > 5;
+
+--Ex3. Create a currency ENUM data type with currency data	
+
+CREATE TYPE CURRENCY AS ENUM ('USD','EUR','GBP')
+
+select 'USD' :: CURRENCY
+
+ALTER TYPE currency ADD VALUE 'CHF' AFTER 'EUR'
+
+CREATE TABLE stocks(
+	stock_id SERIAL PRIMARY KEY,
+	stock_currency currency
+);
+
+INSERT INTO stocks (stock_currency) VALUES ('USD')
+
+SELECT * FROM stocks
+
+
+-- How to drop a type
+
+DROP TYPE address1 CASCADE

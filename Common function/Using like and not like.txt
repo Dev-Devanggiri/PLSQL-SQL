@@ -1,0 +1,22 @@
+-- Using LIKE AND NOT LIKE keyword
+-- Pattern Matching
+
+-- 1. Get all actors whose first name starts with A
+	SELECT * 
+	FROM actors 
+	WHERE first_name like 'A%'
+	
+-- 2. Get all actors whose last name starts with a
+	SELECT * 
+	FROM actors 
+	WHERE last_name like '%a'
+	
+-- 3. Get all actors with first name with 5 characters only
+	SELECT * 
+	FROM actors 
+	WHERE first_name like '_____'
+
+-- 4. Get all actors names where first name contains 'l' on second place
+	SELECT first_name || ' ' || last_name
+	FROM actors 
+	WHERE first_name like '_l%'

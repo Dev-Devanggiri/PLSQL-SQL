@@ -1,0 +1,40 @@
+
+-- Using LIMIT to limit output records
+	SELECT * 
+	FROM movies
+	WHERE movie_length >= 100
+	LIMIT 10;
+
+-- Get top 10 youngest female actress
+	SELECT * FROM actors
+	WHERE gender = 'F' 
+	ORDER BY date_of_birth DESC
+	LIMIT 10;
+
+-- Get top 10 most profitable Domestic movies
+	SELECT movies.movie_id, movies.movie_name , movies_revenues.revenues_domestic 
+	FROM movies,movies_revenues
+	WHERE movies.movie_id = movies_revenues.movie_id  
+	ORDER BY revenues_domestic DESC NULLS LAST
+	LIMIT 10;
+
+-- Get top 10 LEAST profitable Domestic movies
+	SELECT movies.movie_id, movies.movie_name , movies_revenues.revenues_domestic 
+	FROM movies,movies_revenues
+	WHERE movies.movie_id = movies_revenues.movie_id  
+	ORDER BY revenues_domestic NULLS LAST
+	LIMIT 10;
+
+-- Using OFFSET keyword
+-- Get 5 films starting from the fourth one ordered by movie_id
+	SELECT * 
+	FROM movies
+	ORDER BY movie_id
+	LIMIT 5 OFFSET 4;
+
+--List all top 5 movies after the top 5 highest domestic profit movies
+	SELECT movies.movie_id, movies.movie_name , movies_revenues.revenues_domestic 
+	FROM movies,movies_revenues
+	WHERE movies.movie_id = movies_revenues.movie_id  
+	ORDER BY revenues_domestic DESC NULLS LAST
+	LIMIT 5 OFFSET 5;

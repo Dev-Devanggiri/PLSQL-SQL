@@ -1,0 +1,57 @@
+-- Combining queries
+--1. Combie diectors ad Actors table
+
+SELECT first_name, last_name 
+from directors
+NATURAL JOIN actors
+UNION ALL
+SELECT first_name, last_name 
+from actors
+
+--2. Combine all directors where nationality are american , chinese and japanese with all female actors
+SELECT 
+	first_name,
+	last_name
+FROM directors WHERE nationality in ('American','Chinese','Japanese')
+UNION
+SELECT 
+	first_name,
+	last_name
+FROM actors WHERE gender = 'F'
+
+--3. Select the first and last name of all actors and directors which are born after 1990
+SELECT 
+	first_name,
+	last_name
+FROM directors WHERE TO_CHAR(date_of_birth,'yyyy') > '1990'
+UNION
+SELECT 
+	first_name,
+	last_name
+FROM actors WHERE TO_CHAR(date_of_birth,'yyyy') > '1990'
+
+--4. Select the first and last name of all actors and directors whose first name starts with "A"
+SELECT 
+	first_name,
+	last_name,
+	'director' as "Role"
+FROM directors WHERE first_name LIKE 'A%'
+UNION
+SELECT 
+	first_name,
+	last_name,
+	'actor' as "Role"
+FROM actors WHERE first_name LIKE 'A%'
+
+--USING INTERSECT 
+--1 Common names between actors and directors
+
+select first_name, last_name from directors
+INTERSECT
+select first_name, last_name from ACTORS
+
+--Using Except
+
+select first_name, last_name from directors
+EXCEPT
+select first_name, last_name from ACTORS

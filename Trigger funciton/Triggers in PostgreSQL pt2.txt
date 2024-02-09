@@ -1,0 +1,69 @@
+-- Creating Conditional Triggers
+--  we can create a conditional trigger by using a generic when clause
+-- we can use sub queries with WHEN clause 
+-- The when expression should result into boolean value. If the boolean value is False or Null
+-- the trigger function is not called!
+
+-- Ex We want to enforce "No Insert/ Delete/ Update on Friday Afternoon"
+CREATE TABLE mytask(
+	task_id serial primary key,
+	task text
+)
+
+CREATE OR REPLACE FUNCTION fn_cancel_with_message()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS
+$$
+	BEGIN
+		RAISE EXCEPTION '%', TG_ARGV[0];
+		RETURN NULL;
+	END;
+$$
+
+CREATE or REPLACE TRIGGER trg_restriction_on_friday_afternoon
+BEFORE INSERT OR UPDATE OR DELETE OR TRUNCATE
+ON mytask
+for each statement
+WHEN (
+	EXTRACT('DOW' FROM CURRENT_TIMESTAMP) = 4
+	AND CURRENT_TIME > '12:00'
+)
+execute procedure fn_cancel_with_message("No operations allowed on friday afternoon, hehehehehe!")
+
+insert into mytask(task) values ('hehehe')
+-------------------------------------------------------------------------------------------------------------------
+
+
+-- Disallow change in Primary key!
+ CREATE TABLE pk_table(
+ 	id serial primary key,
+	t text
+ )
+ 
+insert into pk_table(t) values ('df'),('sdfsdf')
+
+create or replace function 	disallow_change_pk()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS
+$$
+	BEGIN
+		IF TG_WHEN = 'AFTER' THEN
+			RAISE EXCEPTION 'YOU ARE NOT ALLOWED TO % ROWS IN %.%',
+			TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+		END IF;
+		
+		RAISE NOTICE '% ON ROWS IN %.% WON''T HAPPEN',
+			TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+	  RETURN NULL;     
+	END;
+$$
+
+CREATE OR REPLACE TRIGGER trg_disallow_trigger_name
+before UPDATE OF id
+ON pk_table
+FOR EACH ROW 
+EXECUTE PROCEDURE disallow_change_pk()
+
+UPDATE pk_table set id = 2 where id = 1

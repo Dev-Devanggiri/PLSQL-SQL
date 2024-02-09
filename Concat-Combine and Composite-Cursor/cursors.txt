@@ -1,0 +1,53 @@
+-- Cursor
+DO
+$$
+	DECLARE
+		output_text text default '';
+		rec_movie record;
+		
+		cur_all_movies CURSOR
+			FOR SELECT * FROM movies;
+	BEGIN
+		OPEN cur_all_movies;
+		
+		LOOP
+			FETCH cur_all_movies INTO rec_movie;
+			EXIT WHEN NOT FOUND;
+			
+			output_text := output_text ||','||rec_movie.movie_name;
+		END LOOP;
+		
+		RAISE NOTICE 'ALL MOVIES NAMES %', output_text;
+	END;
+$$ LANGUAGE PLPGSQL 
+
+-- create a function which will use the cursor to loop through all movies rows and concatenate the 
+-- movie title and release date year of movies that has the title contains say the word 'Star'.
+
+CREATE OR REPLACE FUNcTION fn_get_movie_names_by_year(custom_year integer)
+returns text 
+language plpgsql
+as
+$$
+	declare
+		movie_names text default '';
+		rec_movie record;
+		cur_all_movies_by_year CURSOR (custom_year integer)
+		FOR 
+			select movie_name, extract('year' from release_date) as release_year
+			from movies where extract('year' from release_date) = custom_year;
+	begin
+		open cur_all_movies_by_year(custom_year);
+		LOOP
+			FETCH cur_all_movies_by_year INTO rec_movie;
+			EXIT WHEN NOT FOUND;
+			if rec_movie.movie_name like '%Star%'
+				THEN movie_names := movie_names ||','||rec_movie.movie_name||rec_movie.release_year;
+			end if;
+		END LOOP;
+		close cur_all_movies_by_year ;
+		return movie_names;
+	end;
+$$
+
+SELECT fn_get_movie_names_by_year(1977)

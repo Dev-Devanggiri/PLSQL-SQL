@@ -1,0 +1,173 @@
+-- Partitions by Range
+
+CREATE TABLE employees_range(
+	id bigserial,
+	birth_date DATE NOT NULL,
+	country_code VARCHAR(2) NOT NULL
+) PARTITION BY RANGE(birth_date)
+
+--1. yearly partition
+CREATE TABLE employees_range_y2000 PARTITION OF employees_range	
+	FOR VALUES FROM ('2000-01-01') TO ('2001-01-01')
+	
+CREATE TABLE employees_range_y2001 PARTITION OF employees_range	
+	FOR VALUES FROM ('2001-01-01') TO ('2002-01-01')
+	
+ 	-- INSERT operation
+	INSERT INTO employees_range(birth_date, country_code) VALUES
+	('2000-01-01','US'),
+	('2000-01-02','US'),
+	('2000-12-31','US'),
+	('2001-01-01','US')
+	
+select * from employees_range
+select * from only employees_range_y2000
+select * from only employees_range_y2001
+
+-- Partition by List
+CREATE TABLE employees_list(
+	id bigserial,
+	birth_date DATE NOT NULL,
+	country_code VARCHAR(2) NOT NULL
+) PARTITION BY LIST (country_code)
+
+	-- creating partition by list values
+	CREATE TABLE employees_list_us PARTITION OF employees_list
+		FOR VALUES IN ('US') 
+	CREATE TABLE employees_list_eu PARTITION OF employees_list
+		FOR VALUES IN ('UK','DE','IT','FR','ES')
+		
+	-- Inserting Values
+	INSERT INTO employees_list(id, birth_date, country_code) VALUES
+	(1,'2000-01-02','US'),
+	(2,'2000-01-02','US'),
+	(3,'2000-12-31','UK'),
+	(4,'2001-01-01','DE')
+	
+	SELECT * FROM ONLY employees_list
+	SELECT * FROM ONLY employees_list_us
+	SELECT * FROM ONLY employees_list_eu
+	
+	
+-- Partiton By hash
+-- the table is partitioed by specifically a modulus and a remainder for each partition
+CREATE TABLE employees_hash(
+	id bigserial,
+	birth_date DATE NOT NULL,
+	country_code VARCHAR(2) NOT NULL
+) PARTITION BY HASH (ID)
+
+	-- creating partition by HASH values
+	CREATE TABLE employees_hash_1 PARTITION OF employees_hash
+		FOR VALUES WITH (MODULUS 3, REMAINDER 0)
+	CREATE TABLE employees_hash_2 PARTITION OF employees_hash
+		FOR VALUES WITH (MODULUS 3, REMAINDER 1)
+	CREATE TABLE employees_hash_3 PARTITION OF employees_hash
+		FOR VALUES WITH (MODULUS 3, REMAINDER 2)
+	
+		
+	-- Inserting Values
+	INSERT INTO employees_hash(id, birth_date, country_code) VALUES
+	(1,'2000-01-02','US'),
+	(2,'2000-01-02','US'),
+	(3,'2000-12-31','UK'),
+	(4,'2001-01-01','DE')
+
+	select * from employees_hash_3
+
+-- DEFAULT PARTITION
+	
+CREATE TABLE employees_list_default PARTITION OF employees_list DEFAULT; 
+
+INSERT INTO employees_list (id,birth_date,country_code) VALUES 
+(10,'2001-01-01','JP')
+
+SELECT * FROM employees_list_default
+
+-- Multi-level Partitioning
+CREATE TABLE employee_master(
+	id BIGSERIAL,
+	birth_date DATE NOT NULL,
+	country_code VARCHAR(2) NOT NULL
+) PARTITION BY LIST(country_code);
+
+--create partitions
+CREATE TABLE employee_parent_us PARTITION OF employee_master
+	FOR VALUES IN ('US')
+	
+CREATE TABLE employee_parent_eu PARTITION OF employee_master
+	FOR VALUES IN ('UK','DE','IT','FR','ES')
+	PARTITION BY HASH(id)
+	
+	--CREATING SUB PARTITIONS
+	CREATE TABLE employees_parent_eu_1 PARTITION OF employee_parent_eu
+		FOR VALUES WITH (MODULUS 3, REMAINDER 0)
+	CREATE TABLE employees_parent_eu_2 PARTITION OF employee_parent_eu
+		FOR VALUES WITH (MODULUS 3, REMAINDER 1)
+	CREATE TABLE employees_parent_eu_3 PARTITION OF employee_parent_eu
+		FOR VALUES WITH (MODULUS 3, REMAINDER 2)	
+		
+
+	-- Insert values
+	INSERT INTO employee_master(id, birth_date, country_code) VALUES
+	(1,'2000-01-02','US'),
+	(2,'2000-01-02','US'),
+	(3,'2000-12-31','UK'),
+	(4,'2001-01-01','DE')
+	
+	 SELECT * FROM employee_parent_eu
+	 SELECT * FROM employees_parent_eu_1
+	 SELECT * FROM employees_parent_eu_2
+	 SELECT * FROM employees_parent_eu_3
+
+	 -- Partition Maintenance tasks
+
+-- Attaching a new partition
+CREATE TABLE employees_list_SP PARTITION OF employees_list
+	FOR VALUES IN ('SP')
+
+SELECT * FROM EMPLOYEES_LIST
+SELECT * FROM employees_list_SP
+
+INSERT INTO employees_list (id,birth_date,country_code) VALUES
+(1,'2000-01-02','SP'),
+(2,'2000-01-02','SP'),
+(3,'2000-12-31','SP')
+DELETE FROM employees_list where country_code = 'SP'
+
+-- DETACH A PARTITION
+ALTER TABLE EMPLOYEES_LIST DETACH PARTITION EMPLOYEES_LIST_SP
+
+
+-- Altering the bounds of Partition
+create table t1(a int, b int) PARTITION BY RANGE(a)
+
+Create table t1_100 partition of t1
+ for values from(0) To (100)
+ 
+
+Create table t1_200 partition of t1
+ for values from(100) To (200)
+
+Create table t1_300 partition of t1
+ for values from(200) To (300)
+
+
+INSERT INTO t1(a,b) VALUES
+(1,1),
+(100, 2),
+(100,4),
+(200,4),
+(258,3)
+
+SELECT * FROM t1
+
+alter table t1 detach partition t1_300
+alter table t1 attach partition t1_300 for values from (200) to (260)
+
+-- Partition Pruning - decides whether the scanning for query willl happen in partition tables or on the whole master table
+SHOW enable_partition_pruning
+select * from employees_list where country_code = 'US'
+
+SET enable_partition_pruning = off
+SET enable_partition_pruning = on

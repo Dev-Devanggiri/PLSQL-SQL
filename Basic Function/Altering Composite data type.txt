@@ -1,0 +1,76 @@
+-- Alter types
+
+CREATE TYPE myaddress AS(
+	city VARCHAR(50),
+	country VARCHAR(20)
+)
+
+-- rename a type
+ALTER TYPE myaddress
+RENAME TO my_address
+
+-- Change the Owner
+ALTER TYPE my_address OWNER TO rajan
+ALTER TYPE my_address OWNER TO postgres
+
+--change the schema
+ALTER TYPE my_address SET SCHEMA test
+ALTER TYPE test.my_address SET SCHEMA public
+
+-- ADD a New Attribute
+ALTER TYPE my_address ADD ATTRIBUTE street VARCHAR(20)
+
+-- Create a sample ENUM data type
+CREATE type colors AS ENUM('green','red','blue') 
+
+
+-- update a value
+
+ALTER TYPE colors RENAME VALUE 'red' TO 'orange'
+
+--  Add a value
+ALTER TYPE colors ADD VALUE 'red' AFTER 'orange'
+
+-- Update an ENUM data type in production server
+
+CREATE TYPE status_enum AS ENUM ('queued','waiting','running','done')
+
+CREATE TABLE jobs (
+	job_id SERIAL PRIMARY KEY,
+	JOB_STATUS status_enum
+)
+
+INSERT INTO jobs (job_status) VALUES ('running')
+
+SELECT * FROM jobs
+
+
+update jobs set job_status = 'running' where job_status = 'waiting'
+
+
+alter type status_enum RENAME TO status_enum_old
+
+CREATE TYPE status_enum AS ENUM ('queued','running','done')
+
+ALTER TABLE jobs ALTER COLUMN job_status TYPE status_enum USING job_status::text::status_enum
+
+drop type status_enum_old 
+
+
+-- ENUM data type with default value 
+CREATE TYPE status AS ENUM ('pending','approved','declined')
+
+CREATE TABLE cron_jobs(
+	cron_job_id SERIAL PRIMARY KEY,
+	job_status status DEFAULT 'pending'
+);
+
+ALter table cron_jobs 
+ALTER COLUMN cron_job_id TYPE INT
+
+INSERT INTO cron_jobs (cron_job_id) 
+VALUES (5)
+
+SELECT * FROM cron_jobs
+
+

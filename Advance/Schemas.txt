@@ -1,0 +1,38 @@
+-- Create a Schema
+CREATE SCHEMA sales
+CREATE SCHEMA hr
+
+-- Rename a Schema
+ALTER SCHEMA sales RENAME TO programming
+
+-- deleting a schema
+DROP SCHEMA programming
+DROP SCHEMA hr
+
+CREATE TABLE TEST(IDD INT)
+-- Transfering a table to another schema
+ALTER TABLE TEST SET SCHEMA hr 
+
+
+--Schema Search Path
+
+--To view current schema
+SELECT current_schema()
+
+--To view schema Path
+show search_path
+
+--addd schema to search path
+SET search_path TO hr,public;
+
+-- Changing Schema Ownership
+Create schema test
+
+ALTER SCHEMA test OWNER TO rajan
+
+drop schema test
+
+--PG_CATALOG
+
+SELECT * from information_schema.schemata;
+

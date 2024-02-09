@@ -1,0 +1,66 @@
+--1. 
+WITH cte_delete_article AS
+(
+	DELETE FROM ARTICLES WHERE article_id = 1 RETURNING *
+)
+INSERT INTO delete_articles (SELECT * FROM cte_delete_article)
+
+--2.
+WITH cte_delete_article AS
+(
+	DELETE FROM ARTICLES WHERE article_id = 2 RETURNING *
+)
+INSERT INTO delete_articles (SELECT * FROM cte_delete_article)
+
+--3.
+WITH cte_move_all AS(
+	DELETE FROM ARTICLES RETURNING *
+) INSERT INTO articles_insert (SELECT * FROM cte_move_all)
+
+-- Syntax
+WITH RECURSIVE series () AS
+(
+	-- non recursive
+	
+	UNION
+	
+	-- recursive
+	
+)
+-- Creating a time series with Recursive  CTEs
+WITH RECURSIVE series (list_num) AS
+(
+	-- non recursive
+	SELECT 10
+	UNION ALL
+	-- recursive
+	SELECT list_num + 5 FROM series
+	WHERE list_num + 5 <= 50	
+)
+SELECT list_num FROM series
+
+-- Parent Child Relationship using CTE
+
+CREATE TABLE items(
+	pk SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	parent INT
+)
+
+INSERT INTO items (pk,name,parent) VALUES
+(1,'Vegetables',0),
+(2,'fruits',0),
+(3,'apple',2),
+(4,'banana',2)
+
+SELECT * FROM items
+
+-- Show data in parent-child relationship
+WITH RECURSIVE cte_tree AS
+(
+	SELECT name,pk,1 as treeLevel FROM items WHERE parent = 0
+	UNION
+	SELECT tt.name || '->' || items.name, items.pk, tt.treeLevel FROM items JOIN cte_tree tt ON tt.pk = items.parent 
+)
+SELECT treeLevel, name FROM cte_tree
+

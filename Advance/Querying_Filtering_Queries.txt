@@ -1,0 +1,110 @@
+-- Using alias and order by together
+
+	SELECT
+		first_name,
+		last_name AS Surname
+	FROM actors
+	ORDER BY Surname DESC;
+
+
+--USing expression to sort
+	SELECT
+		first_name,
+		LENGTH(first_name) AS len
+	FROM actors
+	ORDER BY len desc;
+
+
+--Using Order by with column name/number
+-- Sort all records by first_name ascending and DOB descending 
+
+	SELECT first_name,last_name,date_of_birth 
+	FROM actors 
+	ORDER BY 
+		1 ASC,
+		3 DESC;
+
+-- Using ORDER BY with Null values
+	SELECT * 
+	FROM demo_sorting
+	ORDER BY num DESC NULLs FIRST
+
+-- Usig ORDER BY with DISTINCT keyword
+
+-- Usig ORDER BY with DISTINCT keyword
+
+	SELECT DISTINCT movie_lang 
+	FROM movies 
+	ORDER BY 1;
+
+
+	SELECT 
+		DISTINCT movie_lang , director_id
+	FROM movies 
+	ORDER BY 1;
+
+-- Using Single Condition:
+	SELECT * FROM movies
+	WHERE movie_lang = 'English';
+
+-- Using AND Operator 
+	SELECT * 
+	FROM movies
+	WHERE movie_lang = 'English' AND age_certificate = '18';
+
+-- Using logical OR Operator
+	SELECT *
+	FROM movies
+	WHERE movie_lang = 'Chinese' OR movie_lang = 'English'
+	ORDER BY movie_lang DESC;
+
+-- Get all english language and director_ID EQUAL TO 8
+	SELECT * 
+	FROM movies
+	WHERE movie_lang = 'English' 
+	      AND director_id = '8';
+
+-- Combining AND and OR operator	
+-- Get all English and chinese movies with age_certificate equal to 12
+	SELECT *
+	FROM movies
+	WHERE 	(movie_lang = 'English' OR movie_lang = 'Chinese') 
+		AND age_certificate = '12';
+
+-- Using Comparison Operators
+-- Get all the movies where movie_len is greater than 100
+	SELECT * 
+	FROM movies
+	WHERE movie_length > '100';
+
+
+-- Filtering based on date
+	SELECT * FROM movies WHERE release_date = '1972-02-02'
+
+-- Using LIMIT to limit output records
+	SELECT * 
+	FROM movies
+	WHERE movie_length >= 100
+	LIMIT 10;
+
+-- Get top 10 youngest female actress
+	SELECT * FROM actors
+	WHERE gender = 'F' 
+	ORDER BY date_of_birth DESC
+	LIMIT 10;
+
+-- Get top 10 most profitable Domestic movies
+	SELECT movies.movie_id, movies.movie_name , movies_revenues.revenues_domestic 
+	FROM movies,movies_revenues
+	WHERE movies.movie_id = movies_revenues.movie_id  
+	ORDER BY revenues_domestic DESC NULLS LAST
+	LIMIT 10;
+
+-- Get top 10 LEAST profitable Domestic movies
+	SELECT movies.movie_id, movies.movie_name , movies_revenues.revenues_domestic 
+	FROM movies,movies_revenues
+	WHERE movies.movie_id = movies_revenues.movie_id  
+	ORDER BY revenues_domestic NULLS LAST
+	LIMIT 10;
+
+

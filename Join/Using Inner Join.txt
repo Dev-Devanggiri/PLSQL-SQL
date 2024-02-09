@@ -1,0 +1,39 @@
+-- INNER JOINS
+
+--1. Select movie name, director name, domestic revenues for all japanese movies
+SELECT mv.movie_name, dr.first_name,dr.last_name, COALESCE( mr.revenues_domestic, 0)
+FROM movies "mv"
+INNER JOIN directors "dr" ON dr.director_id = mv.director_id
+INNER JOIN movies_revenues "mr" ON mv.movie_id = mr.movie_id 
+WHERE mv.movie_lang = 'Japanese'
+
+--2	Select movie_name, director name for all english , chinese and japanese movies  
+-- where domestic revenue is greater than 100
+
+SELECT mv.movie_name, dr.first_name,dr.last_name, mr.revenues_domestic
+FROM movies "mv"
+INNER JOIN directors "dr" ON dr.director_id = mv.director_id
+INNER JOIN movies_revenues "mr" ON mv.movie_id = mr.movie_id 
+WHERE (mv.movie_lang = 'Japanese' OR mv.movie_lang = 'Chinese' OR mv.movie_lang = 'English')
+	AND mr.revenues_domestic > 100
+
+--3 select movie ame, director name, movie_language, total revenues for all top 5 movies
+SELECT mv.movie_name, dr.first_name,dr.last_name, mv.movie_lang, 
+		(COALESCE( mr.revenues_domestic, 0) + COALESCE( mr.revenues_international, 0)) AS "total revenues"
+FROM movies "mv"
+INNER JOIN directors "dr" ON dr.director_id = mv.director_id
+INNER JOIN movies_revenues "mr" ON mv.movie_id = mr.movie_id 
+ORDER BY 5 DESC
+LIMIT 5
+
+--4 What were the top 10 most profitable movies between 2005 and 2008
+-- Print movie ame, director name, movie_language, total revenues 
+SELECT mv.movie_name, dr.first_name,dr.last_name, mv.movie_lang, 
+		(COALESCE( mr.revenues_domestic, 0) + COALESCE( mr.revenues_international, 0)) AS "total revenues"
+FROM movies "mv"
+INNER JOIN directors "dr" ON dr.director_id = mv.director_id
+INNER JOIN movies_revenues "mr" ON mv.movie_id = mr.movie_id 
+WHERE TO_CHAR(mv.release_date::DATE, 'yyyy') BETWEEN '2005' AND '2008'
+ORDER BY 5 DESC 
+LIMIT 10
+

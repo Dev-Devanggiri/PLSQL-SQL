@@ -1,0 +1,26 @@
+-- Using between and not between keyword
+-- 1. Get all actors where DOB between 1991 and 1995
+	SELECT * 
+	FROM actors 
+	WHERE EXTRACT(YEAR FROM date_of_birth) BETWEEN 1991 AND 1995
+	ORDER BY first_name;
+	
+-- 2. Get all movies where release_date between 1998 AND 2002
+	SELECT * 
+	FROM movies
+	WHERE EXTRACT(YEAR FROM release_date) BETWEEN 1998 AND 2002
+	ORDER BY release_date;
+	
+-- 3. Get all movies with Domestic Revenue between 100 AND 300
+	SELECT movies.movie_id, movies.movie_name, movies_revenues.revenues_domestic
+	FROM movies, movies_revenues
+	WHERE (movies.movie_id = movies_revenues.movie_id)
+		  AND movies_revenues.revenues_domestic BETWEEN 100 AND 300
+	ORDER BY revenues_domestic;
+	
+	
+-- 4. Get all movies with movie_length between 100 AND 200
+	SELECT movie_id, movie_name, movie_length
+	FROM movies
+	WHERE movie_length between 100 AND 200
+	ORDER BY movie_length;

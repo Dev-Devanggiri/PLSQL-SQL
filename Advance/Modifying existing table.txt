@@ -1,0 +1,85 @@
+-- Database: mydata
+
+-- DROP DATABASE IF EXISTS mydata;
+
+CREATE DATABASE mydata
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'English_India.1252'
+    LC_CTYPE = 'English_India.1252'
+    LOCALE_PROVIDER = 'libc'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+	
+	
+CREATE TABLE persons(
+	person_id SERIAL PRIMARY KEY,
+	first_name varchar(20),
+	last_name varchar(20)
+);
+
+
+ALTER TABLE persons
+ADD COLUMN email varchar(100) UNIQUE;	
+
+-- RENAME A TABLE:
+ALTER TABLE users
+RENAME TO persons;
+
+--ReNAME a column
+ALTER TABLE persons
+RENAME COLUMN person_age TO age;
+
+
+alter table persons
+alter column person_age type INT
+using person_age::integer
+
+-- Set default value
+ALTER TABLE persons
+ADD COLUMN is_enable varchar(1);
+
+ALTER TABLE persons
+ALTER COLUMN is_enable SET DEFAULT 'Y';
+
+SELECT * FROM persons
+
+INSERT INTO persons (first_name,last_name,nationality,age) values
+('John','Benjamin','US',40);
+
+
+-- ADD A unique constraint to a column
+
+CREATE TABLE weblinks(
+	link_id SERIAL PRIMARY KEY,
+	link_url VARCHAR(255) not NULL,
+	link_target VARCHAR(20)
+);
+
+
+
+
+INSERT INTO weblinks (link_url, link_target) values
+('https://www.amazon.com','_blank');
+
+ALTER TABLE weblinks
+ADD CONSTRAINT unique_web_url UNIQUE (link_url);
+	
+-- to set a column to accpet only defined allowed/acceptable values
+
+ALTER TABLE weblinks 
+ADD COLUMN is_enable VARCHAR(2);	
+
+INSERT INTO weblinks (link_url, link_target, is_enable) values
+('https://www.NETFLIX.com','_blank','O');
+	
+SELECT * FROM weblinks
+
+ALTER TABLE weblinks
+ADD CHECK (is_enable IN ('Y','N'));
+
+UPDATE weblinks
+SET is_enable = 'Y'
+WHERE link_id = 1 or link_id = 3;

@@ -1,0 +1,113 @@
+--Using GROUP by clause
+
+--1. Get total count of all movies grouped by movie_lang
+
+SELECT 
+	movie_lang,
+	COUNT(movie_lang)
+FROM movies
+GROUP BY movie_lang
+
+--2. Get average movie length grouped by movie_lang
+
+SELECT 
+	movie_lang,
+	AVG(movie_length) :: NUMERIC(5,2)
+FROM movies
+GROUP BY movie_lang
+
+--3 Get the sum total of movie_length per age certificate
+
+SELECT 
+	age_certificate,
+	SUM(movie_length) 
+FROM movies
+GROUP BY age_certificate
+
+--4 List minimum and maximum movie length group by movie language
+
+SELECT 
+	movie_lang,
+	MIN(movie_length) "Minimum Movie Length",
+	MAX(movie_length) "Maximum Movie Length"
+FROM movies
+GROUP BY movie_lang
+
+--5 Can we use group by  without aggregate function
+YES
+
+--6 Using more than 1 columns in SELECT 
+-- Get average movie_length group by language and age certificate
+
+SELECT 
+	MOVIE_LANG,
+	AGE_CERTIFICATE,
+	AVG(MOVIE_LENGTH)
+FROM movies
+GROUP BY
+	(MOVIE_LANG,AGE_CERTIFICATE)
+ORDER BY (MOVIE_LANG,AGE_CERTIFICATE)
+
+--7 FILTERING RECORDS
+-- Get avg movie length group by movie_language and age_certificate where movie_length greater than 100
+SELECT 
+	MOVIE_LANG,
+	AGE_CERTIFICATE,
+	AVG(MOVIE_LENGTH) :: NUMERIC(6,2)
+FROM movies
+WHERE 
+MOVIE_LENGTH > 100
+GROUP BY
+	(MOVIE_LANG,AGE_CERTIFICATE)
+ORDER BY (MOVIE_LANG,AGE_CERTIFICATE)
+
+
+--8 Get average movie_length group by movie age certificate where age certificate = 10
+
+SELECT 
+	AGE_CERTIFICATE,
+	AVG(MOVIE_LENGTH) :: NUMERIC(6,2) "Average Movie Length"
+FROM movies
+WHERE 
+AGE_CERTIFICATE = '12'
+GROUP BY
+	AGE_CERTIFICATE
+ORDER BY AGE_CERTIFICATE
+
+--9 Count numbers of directors per each nationality
+SELECT * FROM DIRECTORS
+SELECT 
+	NATIONALITY,
+	COUNT(*)
+FROM DIRECTORS
+GROUP BY NATIONALITY
+ORDER BY 2
+
+--10 Get total sum movie length for each age certificate and movie language combination
+SELECT 
+	movie_lang,
+	age_certificate,
+	SUM(movie_length)
+FROM movies
+GROUP BY movie_lang,age_certificate
+ORDER BY 3 desc
+
+--11 Using Having Clause List all movie languages where sum total of movie length is greater than 200
+SELECT  
+	movie_lang,
+	movie_length,
+	sum(movie_length)
+FROM movies
+GROUP BY movie_lang,movie_length
+HAVING movie_length > 100
+ORDER BY 2
+
+--12 List directors where their sum total movie_length is greater than 100
+
+SELECT 
+	director_id,
+	sum(movie_length) 
+FROM movies
+GROUP BY director_id
+HAVING sum(movie_length) > 100
+

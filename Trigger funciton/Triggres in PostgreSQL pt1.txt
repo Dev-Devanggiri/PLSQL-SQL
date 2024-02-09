@@ -1,0 +1,251 @@
+--Triggres in PostgreSQL
+-- Data Auditing with Triggers
+--1. Modify data at update event
+CREATE TABLE players(
+	player_id SERIAL PRIMARY KEY,
+	name VARCHAR(100)	
+);
+
+CREATE TABLE players_audit (
+	player_audit_id SERIAL PRIMARY KEY,
+	player_id INT NOT NULL,
+	name VARCHAR (100) NOT NULL,
+	edit_date TIMESTAMP NOT NULL
+);
+
+-- Creating a trigger function
+CREATE OR REPLACE FUNCTION fn_player_name_changes_log() 
+	RETURNS TRIGGER
+	LANGUAGE PLPGSQL
+	AS
+$$
+	BEGIN
+		IF
+			NEW.name <> OLD.name THEN
+				INSERT INTO players_audit(player_id, name, edit_date) 
+				VALUES(OLD.player_id, OLD.name, NOW());
+		END IF;
+		RETURN NEW;
+	END;	
+$$
+
+-- Binding a trigger function to a table
+CREATE OR REPLACE TRIGGER trg_players_name_changes
+	BEFORE UPDATE 
+	ON players
+	FOR EACH ROW   
+	EXECUTE PROCEDURE  fn_player_name_changes_log();
+	
+-- INSERTING VALUES
+INSERT INTO players (name) VALUES
+('Adam'),
+('Linda')
+
+select  * from players
+
+--updating table and triggering the trigger
+UPDATE players SET name = 'Rajan' WHERE name = 'Linda'
+select  * from players_audit
+
+
+-- Triggers in PostgreSQL
+/*
+CREATE FUNCTION SYNTAX: 
+CREATE FUNCTION trigger_function() 
+	RETURNS TRIGGER
+	LANGUAGE PLPGSQL
+AS
+$$
+BEGIN
+END;
+$$
+
+-- CREATE TRIGGER FUNCTION
+CREATE TRIGGER trigger_name {BEFORE|AFTER} {EVENT}
+	ON table_name
+	[FOR [EACH] { ROW | STATEMENT }]
+	EXECUTE PROCEDURE trigger_function
+*/
+
+--2. Modify Data at Insert Event
+CREATE TABLE t_temprature_log(
+	id_temprature_log SERIAL PRIMARY KEY,
+	add_date TIMESTAMP,
+	temprature numeric
+);
+
+-- create trigger function:
+CREATE OR REPLACE FUNCTION fn_modify_data()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL AS
+$$
+	BEGIN
+		IF NEW.temprature < -30 
+			THEN NEW.temprature = 0;
+				
+		END IF;
+	RETURN NEW;
+	END;
+$$ 
+
+CREATE OR REPLACE TRIGGER trg_check_temprature 
+BEFORE INSERT 
+ON t_temprature_log
+FOR EACH ROW
+EXECUTE PROCEDURE fn_modify_data();
+
+-- TRY INSERTING DATA IN t_temprature_log
+SELECT * FROM  t_temprature_log
+INSERT INTO t_temprature_log (add_date, temprature) 
+VALUES
+(NOW(), -93),
+(NOW(), -30),
+(NOW(), -29),
+(NOW(), 30),
+(NOW(), 16)
+
+-- Create a functio which displays some key trigger variables data
+
+CREATE OR REPLACE FUNCTION fn_trigger_variables_display()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS
+$$
+	BEGIN 
+		RAISE NOTICE 'TG_NAME:%',TG_NAME;
+		RAISE NOTICE 'TG_RELNAME:%',TG_RELNAME;
+		RAISE NOTICE 'TG_TABLE_SCHEMA:%',TG_TABLE_SCHEMA;
+		RAISE NOTICE 'TG_TABLE_NAME:%',TG_TABLE_NAME;
+		RAISE NOTICE 'TG_WHEN:%',TG_WHEN;
+		RAISE NOTICE 'TG_LEVEL:%',TG_LEVEL;
+		RAISE NOTICE 'TG_OP:%',TG_OP;
+		RAISE NOTICE 'TG_NARGS:%',TG_NARGS;
+		RAISE NOTICE 'TG_NAME:%',TG_NAME;
+	
+		RETURN NEW;
+	END;
+$$
+
+CREATE OR REPLACE TRIGGER trg_trigger_variables_display
+AFTER INSERT
+ON t_temprature_log
+FOR EACH ROW
+EXECUTE PROCEDURE fn_trigger_variables_display()
+
+--
+INSERT INTO t_temprature_log(add_date, temprature)
+VALUES
+(NOW(),22)
+
+-- Using Triggers to Disallow Delete
+CREATE TABLE test_delete(
+	id INT
+);
+--
+INSERT INTO test_delete (id) VALUES (1),(2);
+
+-- CREATE A GENERIC CANCEL FUNCTION FOR OUR USE CASE HERE
+CREATE OR REPLACE FUNCTION fn_generic_cancel_op()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL	
+AS
+$$
+	BEGIN
+		IF TG_WHEN = 'AFTER' THEN
+			RAISE EXCEPTION 'YOU ARE NOT ALLOWED TO % ROWS IN %.%',
+			TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+		END IF;
+		
+		RAISE NOTICE '% ON ROWS IN %.% WON''T HAPPEN',
+			TG_OP, TG_TABLE_SCHEMA, TG_TABLE_NAME;
+	  RETURN NULL;     
+	END;
+$$
+
+-- BINDING THE FUNCTION AT AFTER DELETE
+CREATE TRIGGER trg_disallow_delete
+AFTER DELETE 
+ON t_temprature_log	
+FOR EACH ROW
+EXECUTE PROCEDURE fn_generic_cancel_op()
+
+DROP TRIGGER trg_disallow_delete1 ON t_temprature_log;
+
+DELETE FROM t_temprature_log WHERE temprature = 0
+
+-- Disallowing TRUNCATE
+
+CREATE OR REPLACE FUNCTION fn_disallow_truncate() 
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS
+$$
+	BEGIN
+	IF TG_OP = 'TRUNCATE'
+		THEN 
+		RAISE info '% on %.% wont happen!',
+		tg_op, tg_table_schema, tg_table_name;
+		RAISE EXCEPTION 'You are not allowed to perform Truncate on %.%',
+		tg_table_schema, tg_table_name;
+	END IF;
+	RETURN NULL;
+	END;
+$$
+
+-- CREATING TRIGGER BINDING ON TABLE
+CREATE TRIGGER trg_disallow_truncate 
+AFTER TRUNCATE
+ON t_temprature_log
+FOR STATEMENT
+EXECUTE PROCEDURE fn_disallow_truncate() 
+
+TRUNCATE t_temprature_log
+
+-- Auditing & Logging using Triggers
+CREATE TABLE audit(
+	id int
+)
+CREATE TABLE AUDIT_LOG(
+	username TEXT,
+	add_time TIMESTAMP,
+	table_name TEXT,
+	operation TEXT,
+	row_before JSON,
+	row_after JSON
+);
+
+CREATE OR REPLACE FUNCTION fn_audit_trigger()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS
+$$
+	DECLARE 
+		old_row json = NULL;
+		new_row json = NULL;
+	BEGIN
+		IF TG_OP IN ('UPDATE','DELETE')
+			THEN old_row = row_to_json(OLD);
+		END IF;
+		IF TG_OP IN ('INSERT','UPDATE')
+			THEN new_row = row_to_json(NEW);
+		END IF;
+		
+		INSERT INTO AUDIT_LOG(username, add_time, table_name, operation,row_before,row_after) VALUES
+		(SESSION_USER, CURRENT_TIMESTAMP AT TIME ZONE 'UTC', tg_table_schema ||'.'|| tg_table_name, tg_op, old_row, new_row);
+		
+		
+	 RETURN NEW;
+	END;
+$$ 
+
+CREATE TRIGGER trg_audit_changes
+AFTER DELETE OR UPDATE OR INSERT
+ON audit
+FOR EACH ROW
+EXECUTE PROCEDURE fn_audit_trigger();
+
+INSERT INTO audit VALUES (4)
+SELECT * FROM AUDIT_LOG
+
+UPDATE audit SET id = 1 WHERE id = 4
+

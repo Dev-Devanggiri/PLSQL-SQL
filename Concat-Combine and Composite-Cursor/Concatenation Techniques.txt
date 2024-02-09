@@ -1,0 +1,12 @@
+-- Concatenate using CONCAT_WS function
+-- 1. Combine String 'Hello' and 'World' together 
+SELECT CONCAT_WS(' ','Hello','World')
+
+-- 2. Combine actor's firstname and lastname AS Actor Name
+SELECT CONCAT_WS(' ',first_name,last_name) "Actor''s Name"
+FROM actors
+ORDER BY "Actor''s Name"
+
+-- 3. Combine actor's firstname and lastname and DOB with comma
+SELECT CONCAT_WS(' , ',first_name,last_name,date_of_birth) 
+FROM actors

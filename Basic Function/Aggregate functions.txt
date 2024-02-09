@@ -1,0 +1,73 @@
+--Aggregate Functions
+-- (1) COUNT function
+--1. Count all records in movies table
+SELECT COUNT(*) FROM movies
+
+--2. Count all records of a specific column
+SELECT COUNT(movie_length) FROM movies
+
+--3. Using COUNT with DISTINCT
+SELECT COUNT(DISTINCT movie_lang) FROM movies
+
+--4. Count all distinct movie directors
+SELECT COUNT(DISTINCT director_id) FROM movies
+
+--5. Count all English movies using where clause
+SELECT COUNT(*) FROM movies WHERE lower(movie_lang) = 'english'
+
+--(2) SUM function
+--1. Get total domestic revenues for all movies
+SELECT SUM(revenues_domestic) FROM movies_revenues
+
+--2. Get total domestic revenues for movies where domestic revenue > 200
+SELECT SUM(revenues_domestic) FROM movies_revenues WHERE revenues_domestic > 200
+
+--3. Get total movie_length of all english movies
+SELECT SUM(movie_length) FROM movies WHERE lower(movie_lang) = 'english'
+
+--(3) MIN & MAX functions
+--1. Longest length in movie table
+SELECT MAX(movie_length) FROM movies 
+
+--2. Shortest length in movie table
+SELECT MIN(movie_length) FROM movies 
+
+--3. Longest length in movie table within all english based language
+SELECT MAX(movie_length) FROM movies WHERE movie_lang = 'English'
+
+--4. What is the latest release movie in english language
+SELECT MAX(release_date) FROM movies WHERE movie_lang = 'English'
+
+--5. What was the first movies in chinese language
+SELECT MIN(release_date) FROM movies WHERE movie_lang = 'Chinese'
+
+--(4) GREATEST & LEAST 
+--1. Find the greatest and least revenues per each movie
+SELECT
+	movie_id,
+	revenues_domestic,
+	revenues_international,
+	GREATEST(revenues_domestic,revenues_international) AS highest,
+	LEAST(revenues_domestic,revenues_international) AS lowest
+FROM movies_revenues
+
+--(5) AVERAGE 
+--1. Get average movie length for all movies
+SELECT AVG(movie_length) FROM movies
+
+--2. Get average movie length for all english movies
+SELECT AVG(movie_length) FROM movies WHERE movie_lang = 'English'
+
+--3. Get average movie length for all english movies with DISTINCT Clause
+SELECT AVG(DISTINCT movie_length) FROM movies WHERE movie_lang = 'English'
+
+--4. Use average and sum on movie length for all english movies
+SELECT AVG(movie_length) as AverageLength,
+		SUM(movie_length) 
+FROM movies WHERE movie_lang = 'English'
+
+--(6) Combinig Columns using Mathematical operators
+--1. get total revenues for all movies from movies_revenue Table
+SELECT SUM(revenues_domestic) + SUM(revenues_international) "TOTAL REVENUE" FROM movies_revenues
+SELECT *,(revenues_domestic+revenues_international ) "Total Revenue" FROM movies_revenues
+

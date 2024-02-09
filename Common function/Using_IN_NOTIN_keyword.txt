@@ -1,0 +1,19 @@
+
+-- USING IN / NOT IN
+-- Get all movies where age_certificate is 13 or PG type
+	SELECT *
+	FROM movies 
+	WHERE age_certificate in ('18', 'PG')
+	ORDER BY age_certificate;
+
+-- Get all movies where director is not 13 or 10 type
+	SELECT * 
+	FROM movies 
+	WHERE director_id not in (10, 13)
+	ORDER BY director_id;
+
+-- Get all actors where actor_id is not 1,2,3,4
+	SELECT * 
+	FROM actors 
+	WHERE actor_id not in (1,2,3,4)
+	ORDER BY actor_id;

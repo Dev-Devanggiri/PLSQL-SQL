@@ -1,0 +1,39 @@
+-- Using Right Join
+
+--1. List all the movies with directors first and last name and movie name
+SELECT
+	movie_name,
+	dr.first_name || ' ' || dr.last_name as "Director Name"
+FROM 
+	directors dr
+RIGHT JOIN movies mv ON mv.director_id = dr.director_id
+
+--2. Reverse and check impact
+SELECT
+	movie_name,
+	dr.first_name || ' ' || dr.last_name as "Director Name"
+FROM 
+	movies mv
+RIGHT JOIN directors dr ON mv.director_id = dr.director_id
+
+--3 Add a where clause
+SELECT
+	movie_name,
+	dr.first_name || ' ' || dr.last_name as "Director Name",
+	mv.movie_lang
+FROM 
+	movies mv
+RIGHT JOIN directors dr ON mv.director_id = dr.director_id
+WHERE mv.movie_lang in ('Chinese','English')
+ORDER BY mv.movie_lang
+
+
+--4 Count all movies for each directors
+SELECT
+	dr.first_name || ' ' || dr.last_name as "Director Name",
+	Count(movie_name)
+FROM 
+	directors dr
+RIGHT JOIN movies mv ON  dr.director_id= mv.director_id
+GROUP BY dr.first_name || ' ' || dr.last_name
+ORDER BY 1 ASC

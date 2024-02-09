@@ -1,0 +1,25 @@
+-- Using FETCH
+-- Get top 5 movies biggest movies by movie_length	 
+	SELECT *
+	FROM movies
+	ORDER BY movie_length DESC
+	FETCH FIRST 5 ROWs ONLY;
+
+-- Get top 5 oldest American Directors	 
+	SELECT *
+	FROM directors
+	ORDER BY date_of_birth 
+	FETCH FIRST 5 ROWs ONLY;
+
+-- Get top 10 youngest female actress
+	SELECT * FROM actors
+	WHERE gender = 'F' 
+	ORDER BY date_of_birth DESC
+	FETCH FIRST 10 ROWs ONLY;
+
+-- get first 5 movies from 5th record onward ordered by movie_length
+	SELECT *
+	FROM movies
+	ORDER BY movie_length DESC
+	OFFSET 5
+	FETCH FIRST 5 ROWs ONLY;
